@@ -2,6 +2,7 @@
 
 This folder contains a lightweight, GitHub-ready summary of the local evaluation outputs.
 Large checkpoints and raw simulation environments are intentionally excluded.
+Unified conclusion: action chunking improves execution efficiency, while larger executed horizons weaken closed-loop correction; visual perturbations, especially missing-view conditions, amplify that weakness.
 
 ## LIBERO Receding-Horizon Evaluation
 
