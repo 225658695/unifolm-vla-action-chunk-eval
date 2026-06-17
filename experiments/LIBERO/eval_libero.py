@@ -22,9 +22,8 @@ import torch
 from collections import deque
 from unifolm_vla.rlds_dataloader.constants import NUM_ACTIONS_CHUNK
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-from experiments.LIBERO.libero_utils import DATE_TIME,DATE
-
 from experiments.LIBERO.unifolm_vla_inference import Unifolm_VLA_Inference
+from experiments.LIBERO.libero_utils import DATE_TIME,DATE
 
 from experiments.LIBERO.libero_utils import (
     get_libero_image,
@@ -63,6 +62,9 @@ class Args:
     task_suite_name: str = "libero_goal"  # Task suite. Options: libero_spatial, libero_object, libero_goal, libero_10, libero_90
     num_steps_wait: int = 10  # Number of steps to wait for objects to stabilize i n sim
     num_trials_per_task: int = 50  # Number of rollouts per task
+    max_tasks: int = 0  # Optional limit for smoke tests. 0 means evaluate all tasks.
+    max_steps: int = 0  # Optional rollout step limit for smoke tests. 0 means use suite default.
+    execute_horizon: int = NUM_ACTIONS_CHUNK  # Receding-horizon length. NUM_ACTIONS_CHUNK matches the original policy.
     window_size: int = 2
     #################################################################################################################
     # Utils
@@ -77,7 +79,6 @@ class Args:
     post_process_action: bool = True
 
     unnorm_key: str = "libero_goal_no_noops"
-    
     vlm_pretrained_path: str = None
 
 def prepare_observation(obs, resize_size):
@@ -119,6 +120,34 @@ def log_message(message: str, log_file=None):
     if log_file:
         log_file.write(message + "\n")
         log_file.flush()
+
+def compute_action_metrics(executed_actions: List[np.ndarray]) -> Dict[str, float]:
+    """Compute rollout-level action stability metrics from processed environment actions."""
+    if len(executed_actions) == 0:
+        return {
+            "action_smoothness": 0.0,
+            "position_smoothness": 0.0,
+            "rotation_smoothness": 0.0,
+            "gripper_flips": 0,
+        }
+
+    actions = np.asarray(executed_actions, dtype=np.float32)
+    if len(actions) < 2:
+        return {
+            "action_smoothness": 0.0,
+            "position_smoothness": 0.0,
+            "rotation_smoothness": 0.0,
+            "gripper_flips": 0,
+        }
+
+    deltas = np.diff(actions, axis=0)
+    gripper = actions[:, -1]
+    return {
+        "action_smoothness": float(np.mean(np.linalg.norm(deltas, axis=1))),
+        "position_smoothness": float(np.mean(np.linalg.norm(deltas[:, :3], axis=1))),
+        "rotation_smoothness": float(np.mean(np.linalg.norm(deltas[:, 3:6], axis=1))),
+        "gripper_flips": int(np.sum(np.diff(np.sign(gripper)) != 0)),
+    }
 
 def get_action_state(observations: deque, task_description: str, model: Unifolm_VLA_Inference):
 
@@ -167,7 +196,10 @@ def get_action_state(observations: deque, task_description: str, model: Unifolm_
 def eval_libero(args: Args) -> None:
     logging.info(f"Arguments: {json.dumps(dataclasses.asdict(args), indent=4)}")
 
-
+    if args.execute_horizon < 1 or args.execute_horizon > NUM_ACTIONS_CHUNK:
+        raise ValueError(
+            f"execute_horizon must be in [1, {NUM_ACTIONS_CHUNK}], got {args.execute_horizon}"
+        )
     # Set random seed
     np.random.seed(args.seed)
 
@@ -179,6 +211,7 @@ def eval_libero(args: Args) -> None:
 
 
     pathlib.Path(args.video_out_path + "/" + DATE).mkdir(parents=True, exist_ok=True)
+    pathlib.Path(args.video_out_path).mkdir(parents=True, exist_ok=True)
 
     if args.task_suite_name == "libero_spatial":
         max_steps = 220  
@@ -192,6 +225,8 @@ def eval_libero(args: Args) -> None:
         max_steps = 400  
     else:
         raise ValueError(f"Unknown task suite: {args.task_suite_name}")
+    if args.max_steps > 0:
+        max_steps = args.max_steps
 
     model = Unifolm_VLA_Inference(
         policy_ckpt_path=args.pretrained_path, # to get unnormalization stats
@@ -203,7 +238,10 @@ def eval_libero(args: Args) -> None:
     log_file, local_log_filepath = setup_logging(args)
     # Start evaluation
     total_episodes, total_successes = 0, 0
-    for task_id in tqdm.tqdm(range(num_tasks_in_suite)):
+    total_policy_calls, total_env_steps = 0, 0
+    episode_summaries = []
+    num_tasks_to_eval = min(num_tasks_in_suite, args.max_tasks) if args.max_tasks > 0 else num_tasks_in_suite
+    for task_id in tqdm.tqdm(range(num_tasks_to_eval)):
         # Get task
         task = task_suite.get_task(task_id)
 
@@ -232,8 +270,10 @@ def eval_libero(args: Args) -> None:
 
             log_message(f"Starting episode {task_episodes + 1}...", log_file)
             step = 0
+            episode_policy_calls = 0
+            executed_actions = []
             
-            action_queue = deque(maxlen=NUM_ACTIONS_CHUNK)
+            action_queue = deque(maxlen=args.execute_horizon)
             obs_queue = deque(maxlen=args.window_size)
             success = False
             while t < max_steps + args.num_steps_wait:
@@ -249,11 +289,13 @@ def eval_libero(args: Args) -> None:
                 
                 if len(action_queue) == 0:
                     actions = get_action_state(obs_queue, task_description, model)
-                    action_queue.extend(actions)
+                    episode_policy_calls += 1
+                    action_queue.extend(actions[:args.execute_horizon])
                 obs_queue.popleft()
                 action = action_queue.popleft()
                 
                 action = process_action(action)
+                executed_actions.append(action.copy())
                 
                 obs, reward, done, info = env.step(action.tolist())
                 if done:
@@ -264,13 +306,27 @@ def eval_libero(args: Args) -> None:
                 t += 1
                 step += 1
 
+            action_metrics = compute_action_metrics(executed_actions)
+            total_policy_calls += episode_policy_calls
+            total_env_steps += step
             task_episodes += 1
             total_episodes += 1
+            episode_summary = {
+                "task_id": task_id,
+                "episode_idx": episode_idx,
+                "task_description": task_description,
+                "success": bool(success),
+                "env_steps": int(step),
+                "policy_calls": int(episode_policy_calls),
+                "execute_horizon": int(args.execute_horizon),
+                **action_metrics,
+            }
+            episode_summaries.append(episode_summary)
             
             # Save a replay video of the episode
             suffix = "success" if done else "failure"
             task_segment = task_description.replace(" ", "_")
-            if success == False:
+            if episode_idx == 0 or not success:
                 imageio.mimwrite(
                     pathlib.Path(args.video_out_path)
                     / f"rollout_{task_segment}_episode{episode_idx}_{suffix}.mp4",
@@ -279,6 +335,12 @@ def eval_libero(args: Args) -> None:
                 )
             
             log_message(f"Success: {done}", log_file)
+            log_message(f"Env steps: {step}", log_file)
+            log_message(f"Policy calls: {episode_policy_calls}", log_file)
+            log_message(f"Action smoothness: {action_metrics['action_smoothness']:.6f}", log_file)
+            log_message(f"Position smoothness: {action_metrics['position_smoothness']:.6f}", log_file)
+            log_message(f"Rotation smoothness: {action_metrics['rotation_smoothness']:.6f}", log_file)
+            log_message(f"Gripper flips: {action_metrics['gripper_flips']}", log_file)
             log_message(f"# episodes completed so far: {total_episodes}", log_file)
             log_message(f"# successes: {total_successes} ({total_successes / total_episodes * 100:.1f}%)", log_file)
 
@@ -292,6 +354,31 @@ def eval_libero(args: Args) -> None:
     log_message(f"Total episodes: {total_episodes}", log_file)
     log_message(f"Total successes: {total_successes}", log_file)
     log_message(f"Overall success rate: {final_success_rate:.4f} ({final_success_rate * 100:.1f}%)", log_file)
+    log_message(f"Total policy calls: {total_policy_calls}", log_file)
+    log_message(f"Average policy calls per episode: {total_policy_calls / total_episodes if total_episodes else 0:.4f}", log_file)
+    log_message(f"Average env steps per episode: {total_env_steps / total_episodes if total_episodes else 0:.4f}", log_file)
+
+    summary = {
+        "task_suite_name": args.task_suite_name,
+        "execute_horizon": args.execute_horizon,
+        "num_trials_per_task": args.num_trials_per_task,
+        "num_tasks": num_tasks_to_eval,
+        "total_episodes": total_episodes,
+        "total_successes": total_successes,
+        "success_rate": final_success_rate,
+        "total_policy_calls": total_policy_calls,
+        "avg_policy_calls": total_policy_calls / total_episodes if total_episodes else 0,
+        "avg_env_steps": total_env_steps / total_episodes if total_episodes else 0,
+        "avg_action_smoothness": float(np.mean([ep["action_smoothness"] for ep in episode_summaries])) if episode_summaries else 0.0,
+        "avg_position_smoothness": float(np.mean([ep["position_smoothness"] for ep in episode_summaries])) if episode_summaries else 0.0,
+        "avg_rotation_smoothness": float(np.mean([ep["rotation_smoothness"] for ep in episode_summaries])) if episode_summaries else 0.0,
+        "avg_gripper_flips": float(np.mean([ep["gripper_flips"] for ep in episode_summaries])) if episode_summaries else 0.0,
+        "episodes": episode_summaries,
+    }
+    summary_path = pathlib.Path(args.video_out_path) / f"summary_h{args.execute_horizon}.json"
+    with open(summary_path, "w") as f:
+        json.dump(summary, f, indent=2)
+    log_message(f"Summary JSON: {summary_path}", log_file)
     
     if log_file:
         log_file.close()

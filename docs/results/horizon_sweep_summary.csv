@@ -1,0 +1,5 @@
+execute_horizon,total_episodes,total_successes,success_rate,avg_env_steps,avg_policy_calls,avg_action_smoothness,avg_position_smoothness,avg_rotation_smoothness,avg_gripper_flips,summary_path
+1,50,50,1.0,101.7,102.7,0.11166065216064452,0.08439506337046623,0.010527896191924811,1.46,results/libero_spatial/UnifoLM-VLA-Libero/checkpoints/horizon_sweep/horizon_1/summary_h1.json
+2,50,48,0.96,103.98,52.68,0.11335377037525177,0.08725464165210724,0.011068787612020969,1.36,results/libero_spatial/UnifoLM-VLA-Libero/checkpoints/horizon_sweep/horizon_2/summary_h2.json
+4,50,49,0.98,100.82,25.82,0.11085771784186363,0.08678539581596852,0.011199719551950694,1.28,results/libero_spatial/UnifoLM-VLA-Libero/checkpoints/horizon_sweep/horizon_4/summary_h4.json
+8,50,50,1.0,97.96,12.88,0.11324363172054291,0.0878377988934517,0.011230239775031806,1.26,results/libero_spatial/UnifoLM-VLA-Libero/checkpoints/horizon_sweep/horizon_8/summary_h8.json

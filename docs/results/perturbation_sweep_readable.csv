@@ -1,0 +1,8 @@
+case,success_rate,failures,avg_steps,policy_calls,smoothness,gripper_flips,top_failed_tasks
+Clean,96.7%,1,102.1,13.3,0.112,1.27,2x1
+Brightness 0.5x,96.7%,1,102.4,13.4,0.116,1.67,2x1
+Brightness 1.5x,100.0%,0,99.2,13.0,0.110,1.13,
+Full-view occlusion,93.3%,2,109.5,14.3,0.124,2.40,"4x1, 9x1"
+Wrist occlusion,80.0%,6,123.5,16.0,0.129,3.30,"0x1, 2x1, 4x1"
+Full-view missing,60.0%,12,161.5,20.7,0.140,5.23,"4x3, 7x3, 1x2"
+Wrist missing,30.0%,21,187.2,23.9,0.138,5.47,"0x3, 3x3, 5x3"

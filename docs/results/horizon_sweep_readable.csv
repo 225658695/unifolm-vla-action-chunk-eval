@@ -1,0 +1,5 @@
+execute_horizon,success_rate,avg_env_steps,avg_policy_calls,avg_action_smoothness,avg_gripper_flips
+1,100.0%,101.7,102.7,0.112,1.46
+2,96.0%,104.0,52.7,0.113,1.36
+4,98.0%,100.8,25.8,0.111,1.28
+8,100.0%,98.0,12.9,0.113,1.26

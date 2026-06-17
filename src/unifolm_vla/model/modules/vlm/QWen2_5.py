@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import importlib.util
 from typing import Optional, List
 from transformers.modeling_outputs import CausalLMOutputWithPast
 from transformers import Qwen2_5_VLForConditionalGeneration, AutoProcessor
@@ -63,9 +64,10 @@ class _QWen_VL_Interface(nn.Module):
 
         qwenvl_config = config.framework.get("qwenvl", {})
         model_id = qwenvl_config.get("base_vlm", "Qwen/Qwen2.5-VL-7B-Instruct")
+        attn_implementation = "flash_attention_2" if importlib.util.find_spec("flash_attn") else "sdpa"
         model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
             model_id,
-            attn_implementation="flash_attention_2",
+            attn_implementation=attn_implementation,
             torch_dtype=torch.bfloat16,
             device_map="cuda",
         )
@@ -295,5 +297,4 @@ def get_qwen2_5_interface(config=None, **kwargs):
     model = _QWen_VL_Interface(config=config)
 
     return model
-
 

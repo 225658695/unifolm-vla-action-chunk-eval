@@ -1,0 +1,64 @@
+# Result Gallery
+
+This folder contains a lightweight, GitHub-ready summary of the local evaluation outputs.
+Large checkpoints and raw simulation environments are intentionally excluded.
+
+## LIBERO Receding-Horizon Evaluation
+
+The policy predicts a multi-step action chunk. During evaluation, only the first `k` steps are executed before re-observing and re-planning.
+
+![Horizon tradeoff](assets/horizon_tradeoff.png)
+
+| k | Success | Env Steps | Policy Calls | Smoothness | Gripper Flips |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 100.0% | 101.7 | 102.7 | 0.112 | 1.46 |
+| 2 | 96.0% | 104.0 | 52.7 | 0.113 | 1.36 |
+| 4 | 98.0% | 100.8 | 25.8 | 0.111 | 1.28 |
+| 8 | 100.0% | 98.0 | 12.9 | 0.113 | 1.26 |
+
+![Horizon smoothness](assets/horizon_smoothness.png)
+
+## Observation Perturbation Benchmark
+
+Perturbations are applied to the policy observation stream to test whether multi-view VLA execution remains stable under missing views, random occlusion, and brightness shift.
+
+![Perturbation success](assets/perturbation_success.png)
+
+| Case | Success | Failures | Env Steps | Policy Calls | Smoothness | Gripper Flips | Frequent Failed Task IDs |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Clean | 96.7% | 1 | 102.1 | 13.3 | 0.112 | 1.27 | 2x1 |
+| Brightness 0.5x | 96.7% | 1 | 102.4 | 13.4 | 0.116 | 1.67 | 2x1 |
+| Brightness 1.5x | 100.0% | 0 | 99.2 | 13.0 | 0.110 | 1.13 |  |
+| Full-view occlusion | 93.3% | 2 | 109.5 | 14.3 | 0.124 | 2.40 | 4x1, 9x1 |
+| Wrist occlusion | 80.0% | 6 | 123.5 | 16.0 | 0.129 | 3.30 | 0x1, 2x1, 4x1 |
+| Full-view missing | 60.0% | 12 | 161.5 | 20.7 | 0.140 | 5.23 | 4x3, 7x3, 1x2 |
+| Wrist missing | 30.0% | 21 | 187.2 | 23.9 | 0.138 | 5.47 | 0x3, 3x3, 5x3 |
+
+![Perturbation recovery effort](assets/perturbation_recovery_effort.png)
+
+## Booster K1 Skill Demonstrations
+
+These demonstrations show how the same project structure was extended from LIBERO/Franka evaluation to Booster K1 skill-level execution in MuJoCo or dry-run SDK mappings.
+
+![K1 wall trace](assets/k1_wall_trace.png)
+
+- Wall approach: success=True, final distance=0.53 m, target band=[0.45, 0.60] m.
+- Video: [k1_wall_step_in_place.mp4](assets/k1_wall_step_in_place.mp4)
+
+![K1 ball hit trace](assets/k1_ball_hit_trace.png)
+
+- Ball hit: success=True, displacement norm=3.150 m.
+- Video: [k1_ball_hit.mp4](assets/k1_ball_hit.mp4)
+
+## Files
+
+- `horizon_sweep_summary.csv`: source metrics for execution horizon comparison.
+- `perturbation_sweep_summary.csv`: source metrics for robustness comparison.
+- `assets/*.png`: rendered figures for README or slides.
+- `assets/*.mp4`: short qualitative rollouts small enough for GitHub review.
+
+Regenerate this folder with:
+
+```bash
+python scripts/eval_scripts/build_result_gallery.py
+```

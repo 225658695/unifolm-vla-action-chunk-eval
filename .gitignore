@@ -189,4 +189,12 @@ extracted_frames
 /logs
 /results
 
+# Local generated outputs that should not be uploaded.
+data_pipeline_outputs/
+experiments/logs/
+deployment/**/logs/
 
+# GitHub-facing result gallery. Raw experiment outputs under /results remain ignored.
+!docs/
+!docs/results/
+!docs/results/**

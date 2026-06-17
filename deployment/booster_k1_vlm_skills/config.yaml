@@ -1,0 +1,20 @@
+runtime:
+  dry_run: true
+  max_steps: 3
+  log_dir: deployment/booster_k1_vlm_skills/logs
+
+safety:
+  require_dry_run: true
+  max_head_yaw_delta: 0.4
+  max_head_pitch_delta: 0.25
+  max_joint_delta_abs: 0.05
+  max_ee_delta_abs: 0.03
+  max_speed_scale: 0.2
+
+planner:
+  mode: mock
+  default_hand: right
+
+robot:
+  sdk_network_interface: ""
+

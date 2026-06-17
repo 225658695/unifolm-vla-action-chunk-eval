@@ -12,6 +12,10 @@
 
 **UnifoLM-VLA-0** is a Vision–Language–Action (VLA) large model in the UnifoLM series, designed for general-purpose humanoid robot manipulation. It goes beyond the limitations of conventional Vision–Language Models (VLMs) in physical interaction. Through continued pre-training on robot manipulation data, the model evolves from "vision-language understanding" to an "embodied brain" equipped with physical common sense.
 
+## Result Gallery
+
+For a compact GitHub-friendly summary of the local evaluation results, see [docs/results](docs/results). It includes receding-horizon action chunk metrics, observation perturbation robustness plots, and short Booster K1 MuJoCo skill demonstrations.
+
 <table width="100%">
   <tr>
     <th width="50%">Spatial Semantic Enhancement</th>
@@ -193,7 +197,6 @@ Lots of code are inherited from [Qwen2.5-VL](https://arxiv.org/abs/2502.13923), 
   year         = {2026},
 }
 ```
-
 
 
 
