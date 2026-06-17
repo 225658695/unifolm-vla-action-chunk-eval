@@ -36,26 +36,11 @@ Perturbations are applied to the policy observation stream to test whether multi
 
 ![Perturbation recovery effort](assets/perturbation_recovery_effort.png)
 
-## Booster K1 Skill Demonstrations
-
-These demonstrations show how the same project structure was extended from LIBERO/Franka evaluation to Booster K1 skill-level execution in MuJoCo or dry-run SDK mappings.
-
-![K1 wall trace](assets/k1_wall_trace.png)
-
-- Wall approach: success=True, final distance=0.53 m, target band=[0.45, 0.60] m.
-- Video: [k1_wall_step_in_place.mp4](assets/k1_wall_step_in_place.mp4)
-
-![K1 ball hit trace](assets/k1_ball_hit_trace.png)
-
-- Ball hit: success=True, displacement norm=3.150 m.
-- Video: [k1_ball_hit.mp4](assets/k1_ball_hit.mp4)
-
 ## Files
 
 - `horizon_sweep_summary.csv`: source metrics for execution horizon comparison.
 - `perturbation_sweep_summary.csv`: source metrics for robustness comparison.
 - `assets/*.png`: rendered figures for README or slides.
-- `assets/*.mp4`: short qualitative rollouts small enough for GitHub review.
 
 Regenerate this folder with:
 

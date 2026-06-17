@@ -4,10 +4,7 @@
 from __future__ import annotations
 
 import csv
-import json
-import math
 import shutil
-from collections import Counter
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -231,104 +228,17 @@ def plot_perturbation(rows: list[dict[str, str]]) -> list[dict[str, object]]:
     return table_rows
 
 
-def read_json(path: Path) -> dict[str, object]:
-    with path.open(encoding="utf-8") as f:
-        return json.load(f)
-
-
-def read_trace(path: Path) -> list[dict[str, object]]:
-    rows = []
-    with path.open(encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                rows.append(json.loads(line))
-    return rows
-
-
-def plot_k1_traces() -> list[dict[str, object]]:
-    cards = []
-    k1_wall = RESULTS / "k1_vlm_skill_mujoco" / "k1_vlm_skill_summary.json"
-    k1_hit = RESULTS / "k1_ball_hit_mujoco" / "k1_ball_hit_summary.json"
-    for summary_path in [k1_wall, k1_hit]:
-        if summary_path.exists():
-            summary = read_json(summary_path)
-            cards.append(summary)
-
-    wall_trace = RESULTS / "k1_vlm_skill_mujoco" / "k1_vlm_skill_trace.jsonl"
-    if wall_trace.exists():
-        rows = [r for r in read_trace(wall_trace) if "step" in r and "distance_to_wall" in r]
-        if rows:
-            x = [int(r["step"]) for r in rows]
-            dist = [float(r["distance_to_wall"]) for r in rows]
-            root = [float(r.get("root_x", 0.0)) for r in rows]
-            fig, ax1 = plt.subplots(figsize=(8, 4.5), dpi=180)
-            ax1.plot(x, dist, color="#2563eb", linewidth=2.0, label="Distance to wall")
-            ax1.axhspan(0.45, 0.60, color="#bbf7d0", alpha=0.45, label="Success band")
-            ax1.set_xlabel("Simulation step")
-            ax1.set_ylabel("Distance to wall (m)")
-            ax1.grid(axis="y", alpha=0.22)
-            ax2 = ax1.twinx()
-            ax2.plot(x, root, color="#dc2626", linewidth=1.8, label="Root x")
-            ax2.set_ylabel("Root x (m)")
-            lines, labels = ax1.get_legend_handles_labels()
-            lines2, labels2 = ax2.get_legend_handles_labels()
-            ax1.legend(lines + lines2, labels + labels2, loc="center right", frameon=False)
-            ax1.set_title("K1 Wall-Approach Skill Trace")
-            fig.tight_layout()
-            fig.savefig(ASSETS / "k1_wall_trace.png")
-            plt.close(fig)
-
-    hit_trace = RESULTS / "k1_ball_hit_mujoco" / "k1_ball_hit_trace.jsonl"
-    if hit_trace.exists():
-        rows = [r for r in read_trace(hit_trace) if "step" in r and "ball_displacement" in r]
-        if rows:
-            x = [int(r["step"]) for r in rows]
-            norms = [float(math.sqrt(sum(float(v) ** 2 for v in r["ball_displacement"]))) for r in rows]
-            fig, ax = plt.subplots(figsize=(8, 4.5), dpi=180)
-            ax.plot(x, norms, color="#0f766e", linewidth=2.0)
-            ax.axhline(0.025, color="#dc2626", linestyle="--", linewidth=1.5, label="Success threshold")
-            ax.set_xlabel("Simulation step")
-            ax.set_ylabel("Ball displacement norm (m)")
-            ax.set_title("K1 Ball-Hit Skill Trace")
-            ax.grid(axis="y", alpha=0.22)
-            ax.legend(frameon=False)
-            fig.tight_layout()
-            fig.savefig(ASSETS / "k1_ball_hit_trace.png")
-            plt.close(fig)
-
-    return cards
-
-
 def copy_assets() -> None:
     copies = [
-        (
-            RESULTS / "k1_vlm_skill_mujoco" / "k1_wall_step_in_place.mp4",
-            ASSETS / "k1_wall_step_in_place.mp4",
-        ),
-        (
-            RESULTS / "k1_ball_hit_mujoco" / "k1_ball_hit.mp4",
-            ASSETS / "k1_ball_hit.mp4",
-        ),
-        (
-            RESULTS / "k1_vlm_skill_mujoco" / "first_observation.png",
-            ASSETS / "k1_wall_first_observation.png",
-        ),
-        (
-            RESULTS / "k1_ball_hit_mujoco" / "first_observation.png",
-            ASSETS / "k1_ball_first_observation.png",
-        ),
-    ]
-    libero_videos = sorted(
         (
             RESULTS
             / "libero_spatial"
             / "UnifoLM-VLA-Libero"
             / "checkpoints"
-        ).glob("rollout_*_success.mp4")
-    )
-    if libero_videos:
-        copies.append((libero_videos[0], ASSETS / "libero_spatial_success_example.mp4"))
+            / "rollout_pick_up_the_black_bowl_between_the_plate_and_the_ramekin_and_place_it_on_the_plate_episode0_success.mp4",
+            ASSETS / "libero_spatial_success_example.mp4",
+        ),
+    ]
 
     for src, dst in copies:
         if src.exists():
@@ -341,10 +251,7 @@ def copy_assets() -> None:
         shutil.copy2(PERTURB_CSV, OUT / "perturbation_sweep_summary.csv")
 
 
-def write_readme(horizon_rows: list[dict[str, object]], perturb_rows: list[dict[str, object]], k1_cards: list[dict[str, object]]) -> None:
-    wall = next((c for c in k1_cards if c.get("instruction", "").startswith("walk to the wall")), None)
-    hit = next((c for c in k1_cards if c.get("instruction", "").startswith("hit the blue ball")), None)
-
+def write_readme(horizon_rows: list[dict[str, object]], perturb_rows: list[dict[str, object]]) -> None:
     lines = [
         "# Result Gallery",
         "",
@@ -393,49 +300,20 @@ def write_readme(horizon_rows: list[dict[str, object]], perturb_rows: list[dict[
         "",
         "![Perturbation recovery effort](assets/perturbation_recovery_effort.png)",
         "",
-        "## Booster K1 Skill Demonstrations",
+        "## Files",
         "",
-        "These demonstrations show how the same project structure was extended from LIBERO/Franka evaluation to Booster K1 skill-level execution in MuJoCo or dry-run SDK mappings.",
+        "- `horizon_sweep_summary.csv`: source metrics for execution horizon comparison.",
+        "- `perturbation_sweep_summary.csv`: source metrics for robustness comparison.",
+        "- `assets/*.png`: rendered figures for README or slides.",
+        "- `assets/*.mp4`: short qualitative rollouts small enough for GitHub review.",
         "",
-        "![K1 wall trace](assets/k1_wall_trace.png)",
+        "Regenerate this folder with:",
+        "",
+        "```bash",
+        "python scripts/eval_scripts/build_result_gallery.py",
+        "```",
         "",
     ]
-
-    if wall:
-        lines.extend(
-            [
-                f"- Wall approach: success={wall.get('success')}, final distance={wall.get('final_distance_to_wall')} m, target band=[0.45, 0.60] m.",
-                "- Video: [k1_wall_step_in_place.mp4](assets/k1_wall_step_in_place.mp4)",
-                "",
-            ]
-        )
-    lines.extend(["![K1 ball hit trace](assets/k1_ball_hit_trace.png)", ""])
-    if hit:
-        lines.extend(
-            [
-                f"- Ball hit: success={hit.get('success')}, displacement norm={float(hit.get('ball_displacement_norm', 0.0)):.3f} m.",
-                "- Video: [k1_ball_hit.mp4](assets/k1_ball_hit.mp4)",
-                "",
-            ]
-        )
-
-    lines.extend(
-        [
-            "## Files",
-            "",
-            "- `horizon_sweep_summary.csv`: source metrics for execution horizon comparison.",
-            "- `perturbation_sweep_summary.csv`: source metrics for robustness comparison.",
-            "- `assets/*.png`: rendered figures for README or slides.",
-            "- `assets/*.mp4`: short qualitative rollouts small enough for GitHub review.",
-            "",
-            "Regenerate this folder with:",
-            "",
-            "```bash",
-            "python scripts/eval_scripts/build_result_gallery.py",
-            "```",
-            "",
-        ]
-    )
 
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "README.md").write_text("\n".join(lines), encoding="utf-8")
@@ -447,7 +325,6 @@ def main() -> None:
 
     horizon_rows = plot_horizon(read_csv(HORIZON_CSV)) if HORIZON_CSV.exists() else []
     perturb_rows = plot_perturbation(read_csv(PERTURB_CSV)) if PERTURB_CSV.exists() else []
-    k1_cards = plot_k1_traces()
     copy_assets()
 
     write_csv(
@@ -460,7 +337,7 @@ def main() -> None:
         perturb_rows,
         ["case", "success_rate", "failures", "avg_steps", "policy_calls", "smoothness", "gripper_flips", "top_failed_tasks"],
     )
-    write_readme(horizon_rows, perturb_rows, k1_cards)
+    write_readme(horizon_rows, perturb_rows)
     print(f"Wrote result gallery to {OUT}")
 
 

@@ -14,7 +14,24 @@
 
 ## Result Gallery
 
-For a compact GitHub-friendly summary of the local evaluation results, see [docs/results](docs/results). It includes receding-horizon action chunk metrics, observation perturbation robustness plots, and short Booster K1 MuJoCo skill demonstrations.
+For a compact GitHub-friendly summary of the evaluation results, see [docs/results](docs/results). It contains the main horizon-sweep curves and the observation-perturbation benchmark.
+
+## Project Summary
+
+This project studies how action chunk size and receding-horizon inference affect closed-loop behavior in VLA policies.
+
+**Method**
+
+- Action chunk inference over multi-step trajectories
+- Receding-horizon rollout with partial execution and re-planning
+- LIBERO benchmark evaluation with success, efficiency, and stability metrics
+
+**Results**
+
+- Success rate changes with chunk size
+- Policy calls decrease as chunk size increases
+- Action smoothness and recovery behavior shift under different horizons
+- Robustness degrades under missing-view and occlusion perturbations
 
 <table width="100%">
   <tr>
@@ -197,6 +214,5 @@ Lots of code are inherited from [Qwen2.5-VL](https://arxiv.org/abs/2502.13923), 
   year         = {2026},
 }
 ```
-
 
 
