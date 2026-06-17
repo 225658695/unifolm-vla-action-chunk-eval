@@ -25,6 +25,12 @@ This fork is a focused evaluation project, not a full reproduction of the upstre
 - Action smoothness and recovery behavior shift under different horizons
 - Robustness degrades under missing-view and occlusion perturbations
 
+**Conclusions**
+
+- Larger chunks reduce inference frequency but weaken fine-grained closed-loop correction
+- Receding-horizon execution improves responsiveness, but smaller horizons cost more policy calls
+- Multi-view policies remain brittle when wrist views are missing or heavily occluded
+
 ## Result Gallery
 
 The paper-style figures and summary tables live in [docs/results](docs/results).
@@ -223,4 +229,3 @@ Lots of code are inherited from [Qwen2.5-VL](https://arxiv.org/abs/2502.13923), 
   year         = {2026},
 }
 ```
-
