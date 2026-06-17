@@ -37,6 +37,17 @@
 - receding-horizon 机制能提升响应性，但更小的 horizon 会带来更多 policy calls
 - 多视角策略在 wrist 视角缺失和严重遮挡下仍然比较脆弱
 
+## 我做了什么
+
+- `experiments/LIBERO/eval_libero.py`：receding-horizon action chunk 执行器和指标记录
+- `scripts/eval_scripts/run_eval_horizon_sweep.sh`：200 episodes 的 horizon sweep 入口
+- `scripts/eval_scripts/build_result_gallery.py`：把原始汇总转成论文风格可视化图表
+- `docs/results`：精简后的图表、CSV 和适合 GitHub 展示的结果页
+
+## 上游参考
+
+这个仓库的后半部分仍然保留了上游 UnifoLM-VLA 的模型和训练文档，作为原始项目参考。
+
 **UnifoLM-VLA-0** 是 UnifoLM 系列下面向通用人形机器人操作的视觉-语言-动作（VLA）大模型。该模型旨在突破传统 VLM 在物理交互中的局限，通过在机器人操作数据上的继续预训练，实现了从通用"图文理解"向具备物理常识的"具身大脑"的进化。
 
 <table width="100%">
