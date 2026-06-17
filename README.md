@@ -35,13 +35,6 @@ This fork is a focused evaluation project, not a full reproduction of the upstre
 
 The paper-style figures and summary tables live in [docs/results](docs/results).
 
-## What I Added
-
-- `experiments/LIBERO/eval_libero.py`: receding-horizon action chunk executor and metric logging
-- `scripts/eval_scripts/run_eval_horizon_sweep.sh`: the 200-episode horizon sweep entrypoint
-- `scripts/eval_scripts/build_result_gallery.py`: converts raw summaries into publication-style plots
-- `docs/results`: compact plots, CSVs, and a GitHub-ready result page
-
 ## Upstream Reference
 
 The rest of this repository still contains the upstream UnifoLM-VLA model and training documentation. Those sections are kept below as reference for the original project.
