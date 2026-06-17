@@ -11,6 +11,26 @@
   </p>
 </div>
 
+这个 fork 不是完整复现官方训练仓库，而是一个聚焦于评测的项目。我在这里做的是：研究 VLA policy 的 action chunk 大小与 receding-horizon 推理对闭环执行的影响，并在 LIBERO 上做结果可视化。
+
+**我做的内容**
+
+- action chunk 逐步执行
+- receding-horizon 重新观测与重规划
+- LIBERO 上的 success / efficiency / stability 评测
+
+**可以直接看结果的地方**
+
+- [docs/results](docs/results)
+- horizon sweep 曲线
+- observation perturbation benchmark
+
+**结论概览**
+
+- chunk 更大时，policy calls 会下降
+- 不同 horizon 下动作平滑性和纠错行为会变化
+- 在视角缺失和遮挡下，鲁棒性会明显下降
+
 **UnifoLM-VLA-0** 是 UnifoLM 系列下面向通用人形机器人操作的视觉-语言-动作（VLA）大模型。该模型旨在突破传统 VLM 在物理交互中的局限，通过在机器人操作数据上的继续预训练，实现了从通用"图文理解"向具备物理常识的"具身大脑"的进化。
 
 <table width="100%">

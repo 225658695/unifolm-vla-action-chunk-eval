@@ -1,24 +1,16 @@
 # UnifoLM-VLA-0: A Vision-Language-Action (VLA) Framework under UnifoLM Family
- <p style="font-size: 1.2em;">
-    <a href="https://unigen-x.github.io/unifolm-vla.github.io"><strong>Project Page</strong></a> | 
-    <a href="https://huggingface.co/unitreerobotics/models"><strong>Models</strong></a> |
-    <a href="https://huggingface.co/unitreerobotics/datasets"><strong>Datasets</strong></a> 
-  </p>
+<p style="font-size: 1.1em;">
+  <a href="https://unigen-x.github.io/unifolm-vla.github.io"><strong>Project Page</strong></a> |
+  <a href="https://huggingface.co/unitreerobotics/models"><strong>Models</strong></a> |
+  <a href="https://huggingface.co/unitreerobotics/datasets"><strong>Datasets</strong></a>
+</p>
 <div align="center">
   <p align="right">
     <span> 🌎English </span> | <a href="README_cn.md"> 🇨🇳中文 </a>
   </p>
 </div>
 
-**UnifoLM-VLA-0** is a Vision–Language–Action (VLA) large model in the UnifoLM series, designed for general-purpose humanoid robot manipulation. It goes beyond the limitations of conventional Vision–Language Models (VLMs) in physical interaction. Through continued pre-training on robot manipulation data, the model evolves from "vision-language understanding" to an "embodied brain" equipped with physical common sense.
-
-## Result Gallery
-
-For a compact GitHub-friendly summary of the evaluation results, see [docs/results](docs/results). It contains the main horizon-sweep curves and the observation-perturbation benchmark.
-
-## Project Summary
-
-This project studies how action chunk size and receding-horizon inference affect closed-loop behavior in VLA policies.
+This fork is a focused evaluation project, not a full reproduction of the upstream training repo. The code I added studies how action chunk size and receding-horizon inference affect closed-loop behavior in VLA policies on LIBERO.
 
 **Method**
 
@@ -32,6 +24,23 @@ This project studies how action chunk size and receding-horizon inference affect
 - Policy calls decrease as chunk size increases
 - Action smoothness and recovery behavior shift under different horizons
 - Robustness degrades under missing-view and occlusion perturbations
+
+## Result Gallery
+
+The paper-style figures and summary tables live in [docs/results](docs/results).
+
+## What I Added
+
+- `experiments/LIBERO/eval_libero.py`: receding-horizon action chunk executor and metric logging
+- `scripts/eval_scripts/run_eval_horizon_sweep.sh`: the 200-episode horizon sweep entrypoint
+- `scripts/eval_scripts/build_result_gallery.py`: converts raw summaries into publication-style plots
+- `docs/results`: compact plots, CSVs, and a GitHub-ready result page
+
+## Upstream Reference
+
+The rest of this repository still contains the upstream UnifoLM-VLA model and training documentation. Those sections are kept below as reference for the original project.
+
+**UnifoLM-VLA-0** is a Vision–Language–Action (VLA) large model in the UnifoLM series, designed for general-purpose humanoid robot manipulation. It goes beyond the limitations of conventional Vision–Language Models (VLMs) in physical interaction. Through continued pre-training on robot manipulation data, the model evolves from "vision-language understanding" to an "embodied brain" equipped with physical common sense.
 
 <table width="100%">
   <tr>
@@ -214,5 +223,4 @@ Lots of code are inherited from [Qwen2.5-VL](https://arxiv.org/abs/2502.13923), 
   year         = {2026},
 }
 ```
-
 
