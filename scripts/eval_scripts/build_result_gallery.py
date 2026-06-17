@@ -259,6 +259,8 @@ def write_readme(horizon_rows: list[dict[str, object]], perturb_rows: list[dict[
         "This folder contains a lightweight, GitHub-ready summary of the local evaluation outputs.",
         "Large checkpoints and raw simulation environments are intentionally excluded.",
         "",
+        "Featured qualitative rollout: [libero_spatial_success_example.mp4](assets/libero_spatial_success_example.mp4)",
+        "",
         "## LIBERO Receding-Horizon Evaluation",
         "",
         "The policy predicts a multi-step action chunk. During evaluation, only the first `k` steps are executed before re-observing and re-planning.",

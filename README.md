@@ -13,6 +13,13 @@
 This fork is a focused evaluation project, not a full reproduction of the upstream training repo.
 It studies how action chunk size and receding-horizon inference change the efficiency, stability, and robustness of VLA policies on LIBERO.
 
+<div align="center">
+  <img
+    src="assets/gif/UnifoLM-VLA-0.gif"
+    style="width:100%; max-width:1000px; height:auto;"
+  />
+</div>
+
 **Mechanism**
 
 - The policy predicts a multi-step action chunk.
