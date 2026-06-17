@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import csv
 import shutil
+from collections import Counter
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -278,6 +279,8 @@ def write_readme(horizon_rows: list[dict[str, object]], perturb_rows: list[dict[
         "",
         "![Horizon smoothness](assets/horizon_smoothness.png)",
         "",
+        "Key Insight: larger chunks reduce policy calls sharply, but the improvement in efficiency comes with weaker closed-loop correction. The best horizon is not the largest one; it is the one that balances responsiveness and policy-call cost.",
+        "",
         "## Observation Perturbation Benchmark",
         "",
         "Perturbations are applied to the policy observation stream to test whether multi-view VLA execution remains stable under missing views, random occlusion, and brightness shift.",
@@ -299,6 +302,8 @@ def write_readme(horizon_rows: list[dict[str, object]], perturb_rows: list[dict[
         ),
         "",
         "![Perturbation recovery effort](assets/perturbation_recovery_effort.png)",
+        "",
+        "Key Insight: visual perturbations hurt stability much more than brightness changes. Missing-view conditions are the main failure mode, with wrist-view removal causing the steepest drop in success and the largest increase in recovery cost.",
         "",
         "## Files",
         "",
