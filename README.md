@@ -13,10 +13,6 @@
 This fork is a focused evaluation project, not a full reproduction of the upstream training repo.
 It studies how action chunk size and receding-horizon inference change the efficiency, stability, and robustness of VLA policies on LIBERO.
 
-**Hypothesis**
-
-Longer action chunks should reduce inference cost, but they should also weaken closed-loop correction when the environment shifts.
-
 **Mechanism**
 
 - The policy predicts a multi-step action chunk.
@@ -25,9 +21,9 @@ Longer action chunks should reduce inference cost, but they should also weaken c
 
 **Results**
 
-- Larger chunks reduce policy calls sharply.
+- Horizon sweep: larger chunks reduce policy calls sharply and change the efficiency-stability trade-off.
+- Perturbation benchmark: missing-view and heavy occlusion are the main failure modes for multi-view VLA execution.
 - Receding-horizon execution trades responsiveness against inference cost.
-- Missing-view and heavy occlusion are the main failure modes for multi-view VLA execution.
 
 **Unified Conclusion**
 

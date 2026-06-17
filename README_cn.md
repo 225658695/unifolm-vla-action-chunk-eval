@@ -13,10 +13,6 @@
 
 这个 fork 不是完整复现官方训练仓库，而是一个聚焦于评测的项目。它研究 action chunk 大小和 receding-horizon 推理如何影响 LIBERO 上 VLA policy 的执行效率、稳定性和鲁棒性。
 
-**假设**
-
-更长的 action chunk 可以降低推理成本，但当环境发生变化时，也会削弱闭环纠错能力。
-
 **机制**
 
 - policy 先预测一个多步 action chunk。
@@ -25,9 +21,9 @@
 
 **结果**
 
-- 更大的 chunk 会显著减少 policy calls。
+- horizon sweep：更大的 chunk 会显著减少 policy calls，并改变效率和稳定性的权衡。
+- perturbation benchmark：视角缺失和严重遮挡是多视角 VLA 的主要失效模式。
 - receding-horizon 在响应性和推理成本之间形成权衡。
-- 视角缺失和严重遮挡是多视角 VLA 的主要失效模式。
 
 **统一结论**
 
